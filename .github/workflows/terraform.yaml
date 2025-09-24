@@ -15,6 +15,12 @@ on:
         required: true
       aws-lock-dynamodb-table:
         required: true
+      db_username:
+        required: true
+      db_password:
+        required: true
+      allowed_cidr:
+        required: true
 
 jobs:
   terraform:
@@ -59,6 +65,10 @@ jobs:
       - name: Terraform Destroy
         if: steps.read-destroy-config.outputs.destroy == 'true'
         id: terraform-destroy
+        env:
+          TF_VAR_db_username: ${{ secrets.db_username }}
+          TF_VAR_db_password: ${{ secrets.db_password }}
+          TF_VAR_allowed_cidr: ${{ secrets.allowed_cidr }}
         run: cd infra &&
           terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }} &&
           terraform destroy -var-file="./envs/${{ inputs.environment }}/terraform.tfvars" -auto-approve
@@ -66,6 +76,10 @@ jobs:
       - name: Terraform Plan
         if: steps.read-destroy-config.outputs.destroy != 'true'
         id: terraform-plan
+        env:
+          TF_VAR_db_username: ${{ secrets.db_username }}
+          TF_VAR_db_password: ${{ secrets.db_password }}
+          TF_VAR_allowed_cidr: ${{ secrets.allowed_cidr }}
         run: cd infra &&
           terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }} &&
           terraform plan -var-file="./envs/${{ inputs.environment }}/terraform.tfvars" -out="${{ inputs.environment }}.plan"
@@ -73,6 +87,10 @@ jobs:
       - name: Terraform Apply
         if: steps.read-destroy-config.outputs.destroy != 'true'
         id: terraform-apply
+        env:
+          TF_VAR_db_username: ${{ secrets.db_username }}
+          TF_VAR_db_password: ${{ secrets.db_password }}
+          TF_VAR_allowed_cidr: ${{ secrets.allowed_cidr }}
         run: cd infra &&
           terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }} &&
           terraform apply "${{ inputs.environment }}.plan"
