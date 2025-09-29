@@ -27,6 +27,8 @@ resource "aws_db_instance" "postgres" {
   publicly_accessible    = true
   multi_az               = false
 
+  db_name                = var.db_name
+
   tags = {
     Name = "postgres-rds"
   }
