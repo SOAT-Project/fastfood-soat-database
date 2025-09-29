@@ -2,6 +2,11 @@
 # DATABASE
 ####
 
+variable "db_name" {
+  description = "The name of the database to create when the DB instance is created"
+  type        = string
+}
+
 variable "db_username" {
   description = "Master username for the database"
   type        = string
