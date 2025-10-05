@@ -25,7 +25,7 @@ on:
         required: true
 
 jobs:
-  terraform:
+  database:
     runs-on: ubuntu-latest
     defaults:
       run:
