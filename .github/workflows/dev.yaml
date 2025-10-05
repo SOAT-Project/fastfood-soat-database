@@ -1,0 +1,26 @@
+name: "Development Deploy"
+
+on: 
+  push:
+    branches:
+      - release
+ 
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+
+  call:
+    uses: ./.github/workflows/database.yaml
+    with:
+      environment: dev
+    secrets:
+      aws-assume-role-arn: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+      aws-region: ${{ secrets.AWS_REGION }}
+      aws-statefile-s3-bucket: ${{ secrets.AWS_STATEFILE_S3_BUCKET }}
+      aws-lock-dynamodb-table: ${{ secrets.AWS_LOCK_DYNAMODB_TABLE }}
+      db_name: ${{ secrets.DB_NAME }}
+      db_username: ${{ secrets.DB_USERNAME }}
+      db_password: ${{ secrets.DB_PASSWORD }}
+      allowed_cidr: ${{ secrets.ALLOWED_CIDR }}

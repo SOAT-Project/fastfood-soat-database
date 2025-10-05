@@ -1,9 +1,9 @@
-name: "Release Deploy"
+name: "Production Deploy"
 
 on: 
   push:
     branches:
-      - release
+      - main
  
 permissions:
   id-token: write
@@ -12,9 +12,9 @@ permissions:
 jobs:
 
   call:
-    uses: ./.github/workflows/terraform.yaml
+    uses: ./.github/workflows/database.yaml
     with:
-      environment: dev
+      environment: prod
     secrets:
       aws-assume-role-arn: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
       aws-region: ${{ secrets.AWS_REGION }}
