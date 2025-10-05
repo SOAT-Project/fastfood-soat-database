@@ -1,4 +1,4 @@
-name: "Terraform Workflow"
+name: "Database Workflow"
 
 on: 
   workflow_call:
@@ -27,8 +27,6 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    outputs:
-      db_endpoint: ${{ steps.decode_host.outputs.db_endpoint }}
     defaults:
       run:
         shell: bash
@@ -108,13 +106,10 @@ jobs:
         run: |
           cd infra/terraform
 
-          # 1. Obtém o output bruto (hostname:porta)
           RDS_ENDPOINT_RAW=$(terraform output -raw rds_endpoint)
           
-          # 2. Limpa a porta, obtendo apenas o hostname
           RDS_ENDPOINT_CLEAN=$(echo "$RDS_ENDPOINT_RAW" | cut -d: -f1)
 
-          # 3. 🚨 Base64 ENCODE: Codifica para evitar a redação/mascaramento (***)
           RDS_ENDPOINT_ENCODED=$(echo -n "$RDS_ENDPOINT_CLEAN" | base64 -w 0)
 
           echo "DEBUG: Hostname Limpo (pré-encode): $RDS_ENDPOINT_CLEAN"
@@ -132,16 +127,14 @@ jobs:
         run: |
           ENCODED_HOST="${{ steps.get-output.outputs.rds_endpoint }}"
           
-          # Decodifica o valor Base64 de volta para o hostname puro
           DECODED_HOST=$(echo "$ENCODED_HOST" | base64 -d)
           
           echo "DEBUG: Hostname Decodificado: $DECODED_HOST"
-          
-          # Define o DB_HOST para ser usado nos steps subsequentes
+    
           echo "DB_HOST=$DECODED_HOST" >> $GITHUB_ENV
-          echo "db_endpoint=$DB_HOST" >> $GITHUB_OUTPUT
 
-      - name: Install dependencies and Run Python Script
+      - name: Run Database Scripts
+        if: steps.read-destroy-config.outputs.destroy != 'true'
         env:
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USER: ${{ secrets.DB_USERNAME }}
@@ -149,21 +142,7 @@ jobs:
         run: |
           cd infra/scripts
 
-          echo "RDS Endpoint capturado: $DB_HOST"
-
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
-          echo "RDS Endpoint capturado: $DB_HOST"
-
-          echo "Endpoint=${{ steps.get-output.outputs.rds_endpoint }}"
-          
           python run_scripts.py
-
-  job-test:
-    needs: terraform
-    runs-on: ubuntu-latest
-    steps:
-      - name: teste
-        run: |
-          echo "O endpoint do banco de dados é: $DB_HOST"
