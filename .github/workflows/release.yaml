@@ -39,7 +39,7 @@ jobs:
           
       - name: Install dependencies and Run Python Script
         env:
-          : ${{ needs.terraform.outputs.rds_endpoint }}
+          DB_HOST: ${{ needs.terraform.outputs.rds_endpoint }}
           
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USER: ${{ secrets.DB_USERNAME }}
