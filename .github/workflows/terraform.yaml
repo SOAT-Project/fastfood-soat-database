@@ -31,11 +31,11 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    outputs:
+      rds_endpoint: ${{ steps.get-output.outputs.rds_endpoint }}
     defaults:
       run:
         shell: bash
-    outputs:
-      rds_endpoint: ${{ steps.get-output.outputs.rds_endpoint }}
 
     steps:
       - name: Checkout code
@@ -123,6 +123,16 @@ jobs:
           cd infra/terraform
 
           echo "RDS Endpoint: ${{ steps.get-output.outputs.rds_endpoint }}"
+
+  
+  job-teste:
+    runs-on: ubuntu-latest
+    needs: terraform
+
+    steps:
+      - name: use output from job1
+        run: echo "The output from job1 was ${{ needs.terraform.outputs.rds_endpoint }}"
+
 
   run-scripts:
     needs: terraform
