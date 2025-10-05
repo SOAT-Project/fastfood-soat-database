@@ -26,7 +26,7 @@ jobs:
       allowed_cidr: ${{ secrets.ALLOWED_CIDR }}
 
   notify:
-    name: Notify
+    name: notify
     needs: run
     if: ${{ always() }}
     uses: ./.github/workflows/job-notify-run.yaml

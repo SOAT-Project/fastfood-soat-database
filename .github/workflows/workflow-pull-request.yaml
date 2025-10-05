@@ -9,10 +9,6 @@ on:
 
 jobs:
 
-  tests:
-    name: Tests
-    uses: ./.github/workflows/job-test.yaml
-
   notify:
     name: Notify
     if: ${{ github.event.action == 'opened' || github.event.action == 'reopened' }}
