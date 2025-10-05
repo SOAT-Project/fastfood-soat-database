@@ -34,6 +34,7 @@ jobs:
     outputs:
       rdsendpoint: ${{ steps.get-output.outputs.rds_endpoint }}
       joboutput: ${{ steps.test-job-output.outputs.joboutput }}
+      endpoint: ${{ steps.validate-output.outputs.endpoint }}
     defaults:
       run:
         shell: bash
@@ -124,12 +125,15 @@ jobs:
           cd infra/terraform
 
           echo "RDS Endpoint: ${{ steps.get-output.outputs.rds_endpoint }}"
+          echo "endpoint=${{ steps.get-output.outputs.rds_endpoint }}" >> $GITHUB_OUTPUT
 
       - name: Test job Output
         id: test-job-output
         if: steps.read-destroy-config.outputs.destroy != 'true'
         run: |
           cd infra/terraform
+
+          echo ${{ steps.validate-output.outputs.endpoint }}
 
           echo "joboutput=hello world" >> $GITHUB_OUTPUT
 
@@ -164,8 +168,10 @@ jobs:
         run: echo "The output from terraform was ${{ needs.terraform.outputs.rdsendpoint }}"
 
       - name: use output from terraform 2
-        run: echo "The output from terraform was ${{ needs.terraform.outputs.rds_endpoint }}"
+        run: echo "The output from terraform was ${{ needs.terraform.outputs.joboutput }}"
 
+      - name: use output from terraform 3
+        run: echo "The output from terraform was ${{ needs.terraform.outputs.endpoint }}"
 
   run-scripts:
     needs: terraform
