@@ -27,6 +27,8 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    outputs:
+      db_endpoint: ${{ steps.decode_host.outputs.db_endpoint }}
     defaults:
       run:
         shell: bash
@@ -137,11 +139,10 @@ jobs:
           
           # Define o DB_HOST para ser usado nos steps subsequentes
           echo "DB_HOST=$DECODED_HOST" >> $GITHUB_ENV
-          
+          echo "db_endpoint=$DB_HOST" >> $GITHUB_OUTPUT
+
       - name: Install dependencies and Run Python Script
         env:
-          # DB_HOST: ${{ steps.get-output.outputs.rds_endpoint }}
-          
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USER: ${{ secrets.DB_USERNAME }}
           DB_PASS: ${{ secrets.DB_PASSWORD }}
@@ -158,3 +159,11 @@ jobs:
           echo "Endpoint=${{ steps.get-output.outputs.rds_endpoint }}"
           
           python run_scripts.py
+
+  job-test:
+    needs: terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: teste
+        run: |
+          echo "O endpoint do banco de dados é: ${{ needs.terraform.outputs.db_endpoint }}"
