@@ -166,4 +166,4 @@ jobs:
     steps:
       - name: teste
         run: |
-          echo "O endpoint do banco de dados é: ${{ needs.terraform.outputs.db_endpoint }}"
+          echo "O endpoint do banco de dados é: $DB_HOST"
