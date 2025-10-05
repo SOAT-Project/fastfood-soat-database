@@ -75,8 +75,9 @@ if __name__ == "__main__":
     print(SQL_SCRIPTS_DIR)
     print(YAML_CONFIG_FILE)
     # Verifica se as variáveis de conexão estão presentes
+    print(f"DB_HOST: {DB_HOST}, DB_USER: {DB_USER}, DB_NAME: {DB_NAME}")
     if not all([DB_HOST, DB_USER, DB_PASS]):
-        print("ERRO: Variáveis de ambiente (DB_HOST, DB_USER, PGPASSWORD) não configuradas.", file=sys.stderr)
+        print("ERRO: Variáveis de ambiente (DB_HOST, DB_USER, DB_PASS) não configuradas.", file=sys.stderr)
         sys.exit(1)
 
     # 1. Carrega a lista de scripts do YAML
