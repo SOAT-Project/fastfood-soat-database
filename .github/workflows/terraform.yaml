@@ -26,7 +26,7 @@ on:
     outputs:
       rds_endpoint:
         description: "O endpoint do RDS gerado pelo Terraform"
-        value: jobs.terraform.outputs.rds_endpoint
+        value: ${{ jobs.terraform.outputs.rds_endpoint }}
 
 jobs:
   terraform:
@@ -115,6 +115,14 @@ jobs:
           RDS_ENDPOINT=$(terraform output -raw rds_endpoint)
           
           echo "rds_endpoint=$RDS_ENDPOINT" >> $GITHUB_OUTPUT
+
+      - name: Validate Terraform Output
+        id: validate-output
+        if: steps.read-destroy-config.outputs.destroy != 'true'
+        run: |
+          cd infra/terraform
+
+          echo "RDS Endpoint: ${{ steps.get-output.outputs.rds_endpoint }}"
 
   run-scripts:
     needs: terraform
