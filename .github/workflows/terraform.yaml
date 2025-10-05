@@ -109,7 +109,5 @@ jobs:
           cd infra/terraform
 
           RDS_ENDPOINT=$(terraform output -raw rds_endpoint)
-
-          echo "rds_endpoint=$RDS_ENDPOINT"
-
+          
           echo "rds_endpoint=$RDS_ENDPOINT" >> $GITHUB_OUTPUT
