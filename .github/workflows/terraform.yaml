@@ -23,18 +23,10 @@ on:
         required: true
       allowed_cidr:
         required: true
-    outputs:
-      rds_endpoint:
-        description: "O endpoint do RDS gerado pelo Terraform"
-        value: ${{ jobs.terraform.outputs.rds_endpoint }}
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    outputs:
-      rdsendpoint: ${{ steps.get-output.outputs.rds_endpoint }}
-      joboutput: ${{ steps.test-job-output.outputs.joboutput }}
-      endpoint: ${{ steps.validate-output.outputs.endpoint }}
     defaults:
       run:
         shell: bash
@@ -137,49 +129,6 @@ jobs:
 
           echo "joboutput=hello world" >> $GITHUB_OUTPUT
 
-  
-  job1-teste:
-    runs-on: ubuntu-latest
-    outputs:
-      myoutput: ${{ steps.set-output.outputs.myoutput }}
-
-    steps:
-      - name: set output
-        id: set-output
-        run: echo "myoutput=hello world" >> $GITHUB_OUTPUT
-
-      - name: use output
-        run: echo "The output was ${{ steps.set-output.outputs.myoutput }}"
-
-  job2-teste:
-    runs-on: ubuntu-latest
-    needs: job1-teste
-
-    steps:
-      - name: use output from job1-teste
-        run: echo "The output from job1-teste was ${{ needs.job1-teste.outputs.myoutput }}"
-
-  job3-teste:
-    runs-on: ubuntu-latest
-    needs: terraform
-
-    steps:
-      - name: use output from terraform
-        run: echo "The output from terraform was ${{ needs.terraform.outputs.rdsendpoint }}"
-
-      - name: use output from terraform 2
-        run: echo "The output from terraform was ${{ needs.terraform.outputs.joboutput }}"
-
-      - name: use output from terraform 3
-        run: echo "The output from terraform was ${{ needs.terraform.outputs.endpoint }}"
-
-  run-scripts:
-    needs: terraform
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4 
-        
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -187,7 +136,7 @@ jobs:
           
       - name: Install dependencies and Run Python Script
         env:
-          DB_HOST: ${{ needs.terraform.outputs.rdsendpoint }}
+          DB_HOST: ${{ steps.get-output.outputs.rds_endpoint }}
           
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USER: ${{ secrets.DB_USERNAME }}
@@ -200,6 +149,6 @@ jobs:
           
           echo "RDS Endpoint capturado: $DB_HOST"
 
-          echo "Endpoint=${{ needs.terraform.outputs.rdsendpoint }}"
+          echo "Endpoint=${{ steps.get-output.outputs.rds_endpoint }}"
           
           python run_scripts.py
