@@ -70,32 +70,28 @@ def connect_and_execute(filename):
             conn.close()
 
 if __name__ == "__main__":
-    try:
-        print(SCRIPT_DIR)
-        print(PROJECT_ROOT)
-        print(SQL_SCRIPTS_DIR)
-        print(YAML_CONFIG_FILE)
-        # Verifica se as variáveis de conexão estão presentes
-        print(f"DB_HOST: {DB_HOST}, DB_USER: {DB_USER}, DB_NAME: {DB_NAME}")
-        if not all([DB_HOST, DB_USER, DB_PASS]):
-            print("ERRO: Variáveis de ambiente (DB_HOST, DB_USER, DB_PASS) não configuradas.", file=sys.stderr)
-            sys.exit(1)
-
-        # 1. Carrega a lista de scripts do YAML
-        scripts_to_run = get_scripts_from_yaml(YAML_CONFIG_FILE)
-
-        if not scripts_to_run:
-            print("AVISO: Nenhuma script encontrada no arquivo YAML. Nenhuma migração executada.", file=sys.stderr)
-            sys.exit(0)
-        
-        print(f"Iniciando a execução de {len(scripts_to_run)} scripts definidos no YAML...")
-
-        # 2. Itera e executa os scripts na ordem do YAML
-        for script in scripts_to_run:
-            if isinstance(script, str):
-                connect_and_execute(script)
-
-        print("\n✅ Todos os scripts de inicialização foram processados com sucesso.")
-    except Exception as e:
-        print(f"ERRO inesperado: {e}", file=sys.stderr)
+    print(SCRIPT_DIR)
+    print(PROJECT_ROOT)
+    print(SQL_SCRIPTS_DIR)
+    print(YAML_CONFIG_FILE)
+    # Verifica se as variáveis de conexão estão presentes
+    print(f"DB_HOST: {DB_HOST}, DB_USER: {DB_USER}, DB_NAME: {DB_NAME}")
+    if not all([DB_HOST, DB_USER, DB_PASS]):
+        print("ERRO: Variáveis de ambiente (DB_HOST, DB_USER, DB_PASS) não configuradas.", file=sys.stderr)
         sys.exit(1)
+
+    # 1. Carrega a lista de scripts do YAML
+    scripts_to_run = get_scripts_from_yaml(YAML_CONFIG_FILE)
+
+    if not scripts_to_run:
+        print("AVISO: Nenhuma script encontrada no arquivo YAML. Nenhuma migração executada.", file=sys.stderr)
+        sys.exit(0)
+    
+    print(f"Iniciando a execução de {len(scripts_to_run)} scripts definidos no YAML...")
+
+    # 2. Itera e executa os scripts na ordem do YAML
+    for script in scripts_to_run:
+        if isinstance(script, str):
+            connect_and_execute(script)
+
+    print("\n✅ Todos os scripts de inicialização foram processados com sucesso.")

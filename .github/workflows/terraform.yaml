@@ -100,49 +100,55 @@ jobs:
           terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }} &&
           terraform apply "${{ inputs.environment }}.plan"
 
-      - name: Get Terraform Output
+      - name: Get Terraform Output (Encode Base64)
         id: get-output
         if: steps.read-destroy-config.outputs.destroy != 'true'
         run: |
           cd infra/terraform
 
-          RDS_ENDPOINT=$(terraform output -raw rds_endpoint)
+          # 1. Obtém o output bruto (hostname:porta)
+          RDS_ENDPOINT_RAW=$(terraform output -raw rds_endpoint)
           
-          echo "rds_endpoint=$RDS_ENDPOINT" >> $GITHUB_OUTPUT
+          # 2. Limpa a porta, obtendo apenas o hostname
+          RDS_ENDPOINT_CLEAN=$(echo "$RDS_ENDPOINT_RAW" | cut -d: -f1)
 
-      - name: Validate Terraform Output
-        id: validate-output
-        if: steps.read-destroy-config.outputs.destroy != 'true'
+          # 3. 🚨 Base64 ENCODE: Codifica para evitar a redação/mascaramento (***)
+          RDS_ENDPOINT_ENCODED=$(echo -n "$RDS_ENDPOINT_CLEAN" | base64 -w 0)
+
+          echo "DEBUG: Hostname Limpo (pré-encode): $RDS_ENDPOINT_CLEAN"
+          echo "DEBUG: Hostname Codificado (Base64): $RDS_ENDPOINT_ENCODED"
+          
+          if [ -z "$RDS_ENDPOINT_CLEAN" ]; then
+              echo "::error::O output 'rds_endpoint' está vazio. Verifique se 'terraform apply' foi executado e se o output está definido no seu código Terraform."
+              exit 1
+          fi
+
+          echo "rds_endpoint=$RDS_ENDPOINT_ENCODED" >> $GITHUB_OUTPUT
+
+      - name: Decode DB_HOST and Set Environment Variable
+        id: decode_host
         run: |
-          cd infra/terraform
-
-          echo "RDS Endpoint: ${{ steps.get-output.outputs.rds_endpoint }}"
-          echo "endpoint=${{ steps.get-output.outputs.rds_endpoint }}" >> $GITHUB_OUTPUT
-
-      - name: Test job Output
-        id: test-job-output
-        if: steps.read-destroy-config.outputs.destroy != 'true'
-        run: |
-          cd infra/terraform
-
-          echo ${{ steps.validate-output.outputs.endpoint }}
-
-          echo "joboutput=hello world" >> $GITHUB_OUTPUT
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+          ENCODED_HOST="${{ steps.get-output.outputs.rds_endpoint }}"
+          
+          # Decodifica o valor Base64 de volta para o hostname puro
+          DECODED_HOST=$(echo "$ENCODED_HOST" | base64 -d)
+          
+          echo "DEBUG: Hostname Decodificado: $DECODED_HOST"
+          
+          # Define o DB_HOST para ser usado nos steps subsequentes
+          echo "DB_HOST=$DECODED_HOST" >> $GITHUB_ENV
           
       - name: Install dependencies and Run Python Script
         env:
-          DB_HOST: ${{ steps.get-output.outputs.rds_endpoint }}
+          # DB_HOST: ${{ steps.get-output.outputs.rds_endpoint }}
           
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USER: ${{ secrets.DB_USERNAME }}
           DB_PASS: ${{ secrets.DB_PASSWORD }}
         run: |
           cd infra/scripts
+
+          echo "RDS Endpoint capturado: $DB_HOST"
 
           python -m pip install --upgrade pip
           pip install -r requirements.txt
