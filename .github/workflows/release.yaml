@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  terraform:
+  call_terraform:
     uses: ./.github/workflows/terraform.yaml
     with:
       environment: dev
@@ -26,7 +26,7 @@ jobs:
 
   
   run-scripts:
-    needs: terraform
+    needs: call_terraform
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -39,7 +39,7 @@ jobs:
           
       - name: Install dependencies and Run Python Script
         env:
-          DB_HOST: ${{ needs.terraform.outputs.rds_endpoint }}
+          DB_HOST: ${{ needs.call_terraform.outputs.rds_endpoint }}
           
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USER: ${{ secrets.DB_USERNAME }}
@@ -51,5 +51,7 @@ jobs:
           pip install -r requirements.txt
           
           echo "RDS Endpoint capturado: $DB_HOST"
+
+          echo "Endpoint=${{ needs.call_terraform.outputs.rds_endpoint }}"
           
           python run_scripts.py
