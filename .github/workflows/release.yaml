@@ -11,28 +11,7 @@ permissions:
 
 jobs:
 
-  job1:
-    runs-on: ubuntu-latest
-    outputs:
-      myoutput: ${{ steps.set-output.outputs.myoutput }}
-
-    steps:
-      - name: set output
-        id: set-output
-        run: echo "myoutput=hello world" >> $GITHUB_OUTPUT
-
-      - name: use output
-        run: echo "The output was ${{ steps.set-output.outputs.myoutput }}"
-
-  job2:
-    runs-on: ubuntu-latest
-    needs: job1
-
-    steps:
-      - name: use output from job1
-        run: echo "The output from job1 was ${{ needs.job1.outputs.myoutput }}"
-
-  call_terraform:
+  call:
     uses: ./.github/workflows/terraform.yaml
     with:
       environment: dev
