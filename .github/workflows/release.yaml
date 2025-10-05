@@ -23,3 +23,33 @@ jobs:
       db_username: ${{ secrets.DB_USERNAME }}
       db_password: ${{ secrets.DB_PASSWORD }}
       allowed_cidr: ${{ secrets.ALLOWED_CIDR }}
+
+  
+  run-scripts:
+    needs: terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          
+      - name: Install dependencies and Run Python Script
+        env:
+          DB_HOST: ${{ needs.terraform.outputs.rds_endpoint }}
+          
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USERNAME }}
+          DB_PASS: ${{ secrets.DB_PASSWORD }}
+        run: |
+          cd infra/scripts
+
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+          echo "RDS Endpoint capturado: $DB_HOST"
+          
+          python run_scripts.py
