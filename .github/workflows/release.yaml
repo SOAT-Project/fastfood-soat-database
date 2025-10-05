@@ -29,7 +29,7 @@ jobs:
     name: Notify
     needs: run
     if: ${{ always() }}
-    uses: ./.github/workflows/job-notify-build.yaml
+    uses: ./.github/workflows/job-notify-run.yaml
     with:
       run_status: ${{ needs.run.result }}
       branch_name: release
