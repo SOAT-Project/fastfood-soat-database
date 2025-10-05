@@ -16,7 +16,7 @@ on:
 jobs:
 
   notify-discord:
-    name: Discord
+    name: discord
     runs-on: ubuntu-latest
     steps:
       - name: Send Run Status to Discord
