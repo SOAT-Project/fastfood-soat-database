@@ -143,6 +143,6 @@ jobs:
           
           echo "RDS Endpoint capturado: $DB_HOST"
 
-          echo "Endpoint=${{ needs.call_terraform.outputs.rds_endpoint }}"
+          echo "Endpoint=${{ needs.terraform.outputs.rds_endpoint }}"
           
           python run_scripts.py
