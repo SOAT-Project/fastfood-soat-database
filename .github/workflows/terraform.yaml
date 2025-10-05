@@ -23,6 +23,10 @@ on:
         required: true
       allowed_cidr:
         required: true
+    outputs:
+      rds_endpoint:
+        description: "O endpoint do RDS gerado pelo Terraform"
+        value: ${{ jobs.terraform.outputs.rds_endpoint }}
 
 jobs:
   terraform:
