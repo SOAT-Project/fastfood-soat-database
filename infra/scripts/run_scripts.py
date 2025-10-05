@@ -11,14 +11,10 @@ SQL_SCRIPTS_DIR = os.path.join(PROJECT_ROOT, "scripts")
 
 YAML_CONFIG_FILE = os.path.join(PROJECT_ROOT, "config.yaml") 
 
-# DB_HOST = os.getenv("DB_HOST")
-DB_HOST = "localhost"
-# DB_USER = os.getenv("DB_USER")
-DB_USER = "postgres"
-# DB_PASS = os.getenv("DB_PASS")
-DB_PASS = "P@ssw0rd" 
-# DB_NAME = os.getenv("DB_NAME")
-DB_NAME = "testescripts"
+DB_HOST = os.getenv("DB_HOST")
+DB_USER = os.getenv("DB_USER")
+DB_PASS = os.getenv("DB_PASS")
+DB_NAME = os.getenv("DB_NAME")
 
 def get_scripts_from_yaml(config_file):
     """Carrega a lista de scripts a partir do arquivo YAML."""

@@ -30,6 +30,8 @@ jobs:
     defaults:
       run:
         shell: bash
+    outputs:
+      rds_endpoint: ${{ steps.get-output.outputs.rds_endpoint }}
 
     steps:
       - name: Checkout code
@@ -99,3 +101,13 @@ jobs:
         run: cd infra/terraform &&
           terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }} &&
           terraform apply "${{ inputs.environment }}.plan"
+
+      - name: Get Terraform Output
+        id: get-output
+        if: steps.read-destroy-config.outputs.destroy != 'true'
+        run: |
+          cd infra/terraform
+
+          RDS_ENDPOINT=$(terraform output -raw rds_endpoint)
+          
+          echo "rds_endpoint=$RDS_ENDPOINT" >> $GITHUB_OUTPUT
