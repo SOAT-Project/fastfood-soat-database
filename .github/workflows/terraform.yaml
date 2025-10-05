@@ -125,13 +125,26 @@ jobs:
           echo "RDS Endpoint: ${{ steps.get-output.outputs.rds_endpoint }}"
 
   
-  job-teste:
+  job1-teste:
     runs-on: ubuntu-latest
-    needs: terraform
+    outputs:
+      myoutput: ${{ steps.set-output.outputs.myoutput }}
 
     steps:
-      - name: use output from job1
-        run: echo "The output from job1 was ${{ needs.terraform.outputs.rds_endpoint }}"
+      - name: set output
+        id: set-output
+        run: echo "myoutput=hello world" >> $GITHUB_OUTPUT
+
+      - name: use output
+        run: echo "The output was ${{ steps.set-output.outputs.myoutput }}"
+
+  job2-teste:
+    runs-on: ubuntu-latest
+    needs: job1-teste
+
+    steps:
+      - name: use output from job1-teste
+        run: echo "The output from job1-teste was ${{ needs.job1-teste.outputs.myoutput }}"
 
 
   run-scripts:
