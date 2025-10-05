@@ -32,7 +32,7 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
     outputs:
-      rds_endpoint: ${{ steps.get-output.outputs.rds_endpoint }}
+      rdsendpoint: ${{ steps.get-output.outputs.rds_endpoint }}
       joboutput: ${{ steps.test-job-output.outputs.joboutput }}
     defaults:
       run:
@@ -161,10 +161,10 @@ jobs:
 
     steps:
       - name: use output from terraform
-        run: echo "The output from terraform was ${{ needs.terraform.outputs.rds_endpoint }}"
+        run: echo "The output from terraform was ${{ needs.terraform.outputs.rdsendpoint }}"
 
       - name: use output from terraform 2
-        run: echo "The output from terraform was ${{ needs.terraform.outputs.joboutput }}"
+        run: echo "The output from terraform was ${{ needs.terraform.outputs.rds_endpoint }}"
 
 
   run-scripts:
@@ -181,7 +181,7 @@ jobs:
           
       - name: Install dependencies and Run Python Script
         env:
-          DB_HOST: ${{ needs.terraform.outputs.rds_endpoint }}
+          DB_HOST: ${{ needs.terraform.outputs.rdsendpoint }}
           
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USER: ${{ secrets.DB_USERNAME }}
@@ -194,6 +194,6 @@ jobs:
           
           echo "RDS Endpoint capturado: $DB_HOST"
 
-          echo "Endpoint=${{ needs.terraform.outputs.rds_endpoint }}"
+          echo "Endpoint=${{ needs.terraform.outputs.rdsendpoint }}"
           
           python run_scripts.py
