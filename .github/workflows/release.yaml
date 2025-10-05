@@ -1,9 +1,9 @@
-name: "Production Deploy"
+name: "Release Deploy"
 
 on: 
   push:
     branches:
-      - main
+      - release
  
 permissions:
   id-token: write
@@ -11,10 +11,10 @@ permissions:
 
 jobs:
 
-  call:
+  run:
     uses: ./.github/workflows/database.yaml
     with:
-      environment: prod
+      environment: dev
     secrets:
       aws-assume-role-arn: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
       aws-region: ${{ secrets.AWS_REGION }}
@@ -24,3 +24,14 @@ jobs:
       db_username: ${{ secrets.DB_USERNAME }}
       db_password: ${{ secrets.DB_PASSWORD }}
       allowed_cidr: ${{ secrets.ALLOWED_CIDR }}
+
+  notify:
+    name: Notify
+    needs: run
+    if: ${{ always() }}
+    uses: ./.github/workflows/job-notify-build.yaml
+    with:
+      run_status: ${{ needs.run.result }}
+      branch_name: release
+    secrets:
+      DISCORD_BUILD_WEBHOOK: ${{ secrets.DISCORD_BUILD_WEBHOOK }}

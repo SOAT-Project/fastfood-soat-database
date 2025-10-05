@@ -1,0 +1,42 @@
+name: Notify Discord Build Status
+
+on:
+  workflow_call:
+    inputs:
+      run_status:
+        required: true
+        type: string
+      branch_name:
+        required: true
+        type: string
+    secrets:
+      DISCORD_BUILD_WEBHOOK:
+        required: true
+
+jobs:
+
+  notify-discord:
+    name: Discord
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Run Status to Discord
+        env:
+          BRANCH_NAME: ${{ inputs.branch_name }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RUN_STATUS: ${{ inputs.run_status }}
+        run: |
+          if [ "$RUN_STATUS" == "success" ]; then
+            MESSAGE="✅ Database run and push for '$REPO_NAME' succeeded on the '$BRANCH_NAME' branch! [View Workflow]($WORKFLOW_URL)"
+            COLOR=3066993
+          elif [ "$RUN_STATUS" == "failure" ]; then
+            MESSAGE="❌ Database run and push for '$REPO_NAME' failed on the '$BRANCH_NAME' branch! [View Workflow]($WORKFLOW_URL)"
+            COLOR=15158332
+          else
+            MESSAGE="⚠️ Database run and push status: ${RUN_STATUS} for '$REPO_NAME' on the '$BRANCH_NAME' branch. [View Workflow]($WORKFLOW_URL)"
+            COLOR=16776960
+          fi
+          
+          curl -H "Content-Type: application/json" \
+          -d "{\"embeds\":[{\"description\":\"$MESSAGE\",\"color\":$COLOR}]}" \
+          "${{ secrets.DISCORD_BUILD_WEBHOOK }}"
