@@ -70,12 +70,7 @@ def connect_and_execute(filename):
             conn.close()
 
 if __name__ == "__main__":
-    print(SCRIPT_DIR)
-    print(PROJECT_ROOT)
-    print(SQL_SCRIPTS_DIR)
-    print(YAML_CONFIG_FILE)
     # Verifica se as variáveis de conexão estão presentes
-    print(f"DB_HOST: {DB_HOST}, DB_USER: {DB_USER}, DB_NAME: {DB_NAME}")
     if not all([DB_HOST, DB_USER, DB_PASS]):
         print("ERRO: Variáveis de ambiente (DB_HOST, DB_USER, DB_PASS) não configuradas.", file=sys.stderr)
         sys.exit(1)
