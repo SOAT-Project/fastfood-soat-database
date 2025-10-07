@@ -30,26 +30,118 @@ Este projeto implementa:
 
 ## 🗄️ Estrutura do Banco de Dados
 
-### Tabelas Principais
+O banco de dados do FastFood SOAT foi projetado para garantir integridade, performance e rastreabilidade, utilizando PostgreSQL 17 na AWS RDS. Abaixo estão os principais componentes e características técnicas:
 
-| Tabela | Descrição | Características |
-|--------|-----------|-----------------|
-| `clients` | Cadastro de clientes | Soft delete, UUID público |
-| `orders` | Pedidos do sistema | Numeração sequencial, status |
-| `order_products` | Itens dos pedidos | Relacionamento N:N |
-| `products` | Catálogo de produtos | Preços, categorias |
-| `product_categories` | Categorias (Lanche, Bebida, etc.) | Sistema fixo |
-| `payments` | Pagamentos | QR Code, referência externa |
-| `staff` | Funcionários | Sistema de permissões |
-| `roles` | Cargos (ADMIN, EMPLOYEE) | Controle de acesso |
+### Diagrama
+
+![Diagrama de Banco de Dados](./docs/diagrama-db.png)
+
+### Diagrama Entidade-Relacionamento (ER)
+
+```mermaid
+erDiagram
+    CLIENTS ||--o{ ORDERS : "possui"
+    ORDERS ||--o{ ORDER_PRODUCTS : "contém"
+    PRODUCTS ||--o{ ORDER_PRODUCTS : "referenciado"
+    PRODUCTS }o--|| PRODUCT_CATEGORIES : "classificado"
+    ORDERS ||--o{ PAYMENTS : "pago por"
+    STAFF ||--o{ STAFF_ROLES : "associado"
+    ROLES ||--o{ STAFF_ROLES : "associado"
+```
+
+### Tabelas e Campos
+
+#### 1. clients
+- **id**: PK, auto-incremento
+- **public_id**: UUID público (char(36)), indexado
+- **name, email, cpf**: Dados cadastrais, CPF indexado (hash)
+- **created_at, updated_at, deleted_at**: Auditoria e soft delete
+- **Triggers**: Atualização automática de updated_at
+
+#### 2. orders
+- **id**: PK, auto-incremento
+- **public_id**: UUID público, indexado (hash)
+- **value**: Valor total do pedido
+- **order_number**: Sequencial
+- **status**: Status do pedido, indexado
+- **client_id**: FK para clients
+- **created_at, updated_at, deleted_at**: Auditoria
+- **Índices**: status+created_at, created_at (B-tree, BRIN)
+- **Triggers**: Atualização automática de updated_at
+
+#### 3. product_categories
+- **id**: PK, auto-incremento
+- **name**: Nome da categoria
+- **created_at, updated_at, deleted_at**: Auditoria
+- **Triggers**: Atualização automática de updated_at
+
+#### 4. products
+- **id**: PK, auto-incremento
+- **value**: Preço
+- **name, description, image_url**: Dados do produto
+- **product_category_id**: FK para product_categories
+- **created_at, updated_at, deleted_at**: Auditoria
+- **Triggers**: Atualização automática de updated_at
+
+#### 5. order_products
+- **id**: PK, auto-incremento
+- **value**: Valor do item
+- **order_id**: FK para orders
+- **product_id**: FK para products
+- **quantity**: Quantidade
+- **created_at, updated_at, deleted_at**: Auditoria
+- **Triggers**: Atualização automática de updated_at
+
+#### 6. payments
+- **id**: PK, auto-incremento
+- **value**: Valor pago
+- **external_reference**: Referência externa, indexada (hash)
+- **qr_code**: Dados do QR Code
+- **order_id**: FK para orders
+- **status**: Status do pagamento, indexado (hash)
+- **created_at, updated_at, deleted_at**: Auditoria
+- **Triggers**: Atualização automática de updated_at
+
+#### 7. staff
+- **id**: PK, auto-incremento
+- **name, email, cpf**: Dados do funcionário
+- **is_active**: Status de ativação
+- **created_at, updated_at, deleted_at**: Auditoria
+- **Triggers**: Atualização automática de updated_at
+
+#### 8. roles
+- **id**: PK, auto-incremento
+- **role_name**: Nome do cargo
+- **created_at, updated_at, deleted_at**: Auditoria
+- **Triggers**: Atualização automática de updated_at
+
+#### 9. staff_roles
+- **id**: PK, auto-incremento
+- **staff_id**: FK para staff
+- **role_id**: FK para roles
+- **created_at, updated_at, deleted_at**: Auditoria
+- **Triggers**: Atualização automática de updated_at
+
+#### 10. flyway_schema_history
+- **installed_rank**: PK
+- **version, description, type, script, checksum, installed_by, installed_on, execution_time, success**: Controle de migrações
+- **Índice**: success
 
 ### Características Técnicas
 
-- ✅ **Soft Delete**: Todas as tabelas com `deleted_at`
-- ✅ **Auditoria**: `created_at` e `updated_at` automáticos
-- ✅ **UUIDs**: Identificação externa segura
-- ✅ **Índices Otimizados**: Hash, B-tree e BRIN
-- ✅ **Triggers**: Timestamps automáticos
+- **Soft Delete**: Todas as tabelas possuem o campo deleted_at
+- **Auditoria**: Campos created_at e updated_at com triggers automáticas
+- **UUIDs**: Identificação segura para entidades públicas
+- **Índices**: Hash, B-tree e BRIN para performance
+- **Triggers**: Função update_timestamp() para atualização automática de timestamps
+- **Relacionamentos**: Integridade referencial via FKs
+
+### Fluxo de Dados
+
+1. **Cadastro de Cliente**: clients → orders
+2. **Pedido**: orders → order_products → products
+3. **Pagamento**: payments vinculado ao pedido
+4. **Gestão de Funcionários**: staff → staff_roles → roles
 
 ## 📁 Estrutura do Projeto
 
