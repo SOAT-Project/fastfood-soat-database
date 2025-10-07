@@ -4,7 +4,7 @@
 
 resource "aws_db_subnet_group" "rds_subnet_group" {
   name       = "rds-subnet-group"
-  subnet_ids = data.aws_subnets.fastfood-soat-vpc-subnets.ids
+  subnet_ids = [aws_subnet.public_a.id, aws_subnet.public_b.id]
 
   tags = {
     Name = "rds-subnet-group"

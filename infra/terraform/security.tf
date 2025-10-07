@@ -5,7 +5,7 @@
 resource "aws_security_group" "rds_sg" {
   name        = "rds-sg"
   description = "Allow PostgreSQL inbound traffic"
-  vpc_id      = data.aws_vpc.fastfood-soat-vpc.id
+  vpc_id      = aws_vpc.fastfood-vpc.id
 
   ingress {
     from_port   = 5432
