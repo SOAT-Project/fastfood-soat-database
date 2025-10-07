@@ -1,0 +1,22 @@
+name: Pull Request Workflow
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches:
+      - main
+      - release
+
+jobs:
+
+  notify:
+    name: Notify
+    if: ${{ github.event.action == 'opened' || github.event.action == 'reopened' }}
+    uses: ./.github/workflows/job-notify-pull-request.yaml
+    with:
+      pr_title: ${{ github.event.pull_request.title }}
+      pr_number: ${{ github.event.pull_request.number }}
+      pr_url: ${{ github.event.pull_request.html_url }}
+      pr_author: ${{ github.event.pull_request.user.login }}
+    secrets:
+      DISCORD_PULLREQUEST_WEBHOOK: ${{ secrets.DISCORD_PULLREQUEST_WEBHOOK }}

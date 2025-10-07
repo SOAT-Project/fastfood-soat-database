@@ -1,0 +1,3 @@
+scripts:
+  - V1__init.sql
+  - V2__insert_initial_data.sql

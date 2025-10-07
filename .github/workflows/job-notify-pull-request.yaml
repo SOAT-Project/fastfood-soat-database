@@ -1,0 +1,41 @@
+name: Notify Pull Request on Discord (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      pr_title:
+        required: true
+        type: string
+      pr_number:
+        required: true
+        type: string
+      pr_url:
+        required: true
+        type: string
+      pr_author:
+        required: true
+        type: string
+    secrets:
+      DISCORD_PULLREQUEST_WEBHOOK:
+        required: true
+
+jobs:
+
+  notify:
+    name: Discord
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Pull Request on Discord
+        env:
+          PR_TITLE: ${{ inputs.pr_title }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          PR_URL: ${{ inputs.pr_url }}
+          PR_AUTHOR: ${{ inputs.pr_author }}
+        run: |
+          # Formate a mensagem com informações do PR
+          MESSAGE="New Pull Request #${PR_NUMBER} opened by ${PR_AUTHOR}:\n> **${PR_TITLE}**\n\n[View Pull Request](${PR_URL})"
+
+          # Envie a mensagem para o Discord usando curl
+          curl -H "Content-Type: application/json" \
+          -d "{\"content\": \"$MESSAGE\"}" \
+          "${{ secrets.DISCORD_PULLREQUEST_WEBHOOK }}"
