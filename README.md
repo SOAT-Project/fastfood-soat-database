@@ -367,3 +367,18 @@ Para adicionar uma nova migração:
 | "Bucket não existe" | Criar bucket S3 para Terraform state |
 | "Subnet não encontrada" | Verificar tags da VPC (`Name: fastfood-vpc`) |
 | "Script SQL falhou" | Verificar logs no GitHub Actions |
+
+## 🐘 Por que usar PostgreSQL?
+
+O PostgreSQL foi escolhido por ser um dos bancos de dados relacionais mais robustos, seguros e avançados do mercado. Entre os principais motivos estão:
+
+- **Open Source e sem custos de licença**
+- **Alta conformidade com padrões SQL**
+- **Suporte avançado a transações e integridade de dados**
+- **Extensibilidade**: permite criação de funções, tipos e operadores customizados
+- **Performance e escalabilidade**: ideal para aplicações de missão crítica
+- **Recursos avançados**: JSON, índices BRIN, triggers, views, CTEs, entre outros
+- **Comunidade ativa e vasta documentação**
+- **Integração nativa com AWS RDS**
+
+Essas características garantem flexibilidade, segurança e facilidade de manutenção para o sistema FastFood SOAT.
